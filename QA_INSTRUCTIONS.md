@@ -73,3 +73,64 @@ Once the server is running, open your web browser and go to: **[http://localhost
 
 --- 
 *If you run into any errors or crashes with dependencies, try deleting the `node_modules` folder and `.next` folder, and re-running `npm install` and `npm run dev`.*
+
+---
+
+## Known Issues (Reported)
+
+### 1) Wishlist icon (heart) is not clickable on product cards
+- Area: Storefront product listings (for example `/` and `/products`)
+- Reproduction steps:
+	1. Open the product listing page.
+	2. Hover or click the heart icon on any product card.
+	3. Attempt to add the product to wishlist.
+- Actual result: The heart icon is not clickable and the product is not added to wishlist.
+- Expected result: Clicking the heart icon should add/remove the product from wishlist and show a clear UI state update.
+
+### 2) Product detail page has no wishlist icon
+- Area: Product details page (`/products/[id]`)
+- Reproduction steps:
+	1. Open any product from the listing.
+	2. Inspect the product detail view controls.
+- Actual result: There is no wishlist (heart) control on the product detail page.
+- Expected result: A wishlist control should be visible and usable on product detail pages.
+
+### 3) User profile dropdown Dashboard/Settings show wrong content
+- Area: Header profile menu (user icon dropdown)
+- Reproduction steps:
+	1. Sign in as a customer account.
+	2. Click the user profile icon in the header.
+	3. Click `Dashboard` and then `Settings` from the dropdown menu.
+- Actual result: `Dashboard` and `Settings` lead to an account view that only shows `Order History` and `Wishlist` instead of dedicated dashboard/settings content.
+- Expected result: `Dashboard` should show dashboard-specific content and `Settings` should show editable account settings.
+
+### 4) Cart checkout does not allow selecting specific item(s)
+- Area: Shopping cart (`/cart`) and checkout flow (`/checkout`)
+- Reproduction steps:
+	1. Add multiple products to cart.
+	2. Open the cart page.
+	3. Try to select only one or some items for checkout.
+	4. Click `Proceed to Checkout`.
+- Actual result: The flow does not provide item-level selection for checkout; checkout uses all cart items.
+- Expected result: User should be able to choose specific item(s) in cart and proceed to checkout with only the selected item(s).
+
+### 5) First-time logged-in user info is not properly saved for reuse
+- Area: Checkout information step (`/checkout`) and account profile data handling
+- Reproduction steps:
+	1. Log in with a user account that has no saved profile/shipping information.
+	2. Go to checkout.
+	3. Fill in required personal and shipping fields.
+	4. Complete the save/continue flow.
+	5. Return to checkout or account settings.
+- Actual result: First-time user information is not reliably saved and reused.
+- Expected result: First-time logged-in users should be prompted to provide required information and have authority to save it for future checkouts and profile reuse.
+
+### 6) Guest user can proceed to checkout without authentication
+- Area: Cart to checkout transition (`/cart` -> `/checkout`)
+- Reproduction steps:
+	1. Ensure user is logged out.
+	2. Add one or more items to cart.
+	3. Open cart page.
+	4. Click `Proceed to Checkout`.
+- Actual result: User is allowed to proceed directly to checkout while unauthenticated.
+- Expected result: Guest users may add items to cart, but clicking `Proceed to Checkout` must redirect them to sign in/sign up before continuing.
