@@ -31,20 +31,20 @@ export function Navbar() {
   }, [])
 
   return (
-    <header className="sticky top-0 z-40 border-b border-brown/10 bg-beige/80 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="text-lg font-semibold text-brown">
-            EUNOS EcoGear
+    <header className="sticky top-0 z-40 border-b border-primary/10 bg-white/95 backdrop-blur-sm shadow-sm">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-12">
+          <Link href="/" className="font-bold text-lg tracking-tight text-brown">
+            EcoGear
           </Link>
-          <nav className="hidden items-center gap-5 text-sm text-brown/80 md:flex">
-            <Link href="/products?category=camping" className="hover:text-brown">
+          <nav className="hidden items-center gap-8 text-sm text-brown/70 md:flex">
+            <Link href="/products?category=camping" className="hover:text-brown transition-colors">
               Camping
             </Link>
-            <Link href="/products?category=hiking" className="hover:text-brown">
+            <Link href="/products?category=hiking" className="hover:text-brown transition-colors">
               Hiking
             </Link>
-            <Link href="/products?category=clothing" className="hover:text-brown">
+            <Link href="/products?category=clothing" className="hover:text-brown transition-colors">
               Clothing
             </Link>
           </nav>

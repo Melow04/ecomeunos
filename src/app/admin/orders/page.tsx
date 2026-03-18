@@ -26,6 +26,13 @@ function statusVariant(status: Row['order']['status']): BadgeVariant {
   return 'red'
 }
 
+function getStatusColor(status: Row['order']['status']) {
+  if (status === 'pending') return 'bg-yellow-100 text-yellow-800'
+  if (status === 'processing' || status === 'shipped') return 'bg-blue-100 text-blue-800'
+  if (status === 'delivered') return 'bg-green-100 text-green-800'
+  return 'bg-red-100 text-red-800'
+}
+
 export default function AdminOrdersPage() {
   const [items, setItems] = React.useState<Row[]>([])
   const [loading, setLoading] = React.useState(true)
@@ -53,50 +60,53 @@ export default function AdminOrdersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-brown">Order Management</h1>
-        <div className="mt-1 text-sm text-muted">Update fulfillment status</div>
+        <h1 className="text-2xl font-bold text-brown">Order Management</h1>
+        <p className="mt-1 text-sm text-muted">Update fulfillment status</p>
       </div>
 
       <Card className="p-6">
         {loading ? (
-          <div className="text-sm text-muted">Loading…</div>
+          <div className="text-sm text-muted py-8">Loading…</div>
+        ) : items.length === 0 ? (
+          <div className="text-sm text-muted py-8 text-center">No orders found</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full">
               <thead>
-                <tr className="text-left text-muted">
-                  <th className="py-2">Order ID</th>
-                  <th className="py-2">Customer</th>
-                  <th className="py-2">Amount</th>
-                  <th className="py-2">Status</th>
-                  <th className="py-2">Date</th>
+                <tr className="border-b border-brown/10">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Order ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Customer</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Amount</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Date</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((r) => (
-                  <tr key={r.order.id} className="border-t border-brown/10">
-                    <td className="py-3 font-medium text-brown">{r.order.id}</td>
-                    <td className="py-3 text-brown/80">
+                  <tr key={r.order.id} className="border-b border-brown/10 hover:bg-brown/2">
+                    <td className="px-4 py-4 font-semibold text-brown">{r.order.id}</td>
+                    <td className="px-4 py-4 text-sm text-muted">
                       {r.customerEmail ?? r.shippingEmail ?? 'Guest'}
                     </td>
-                    <td className="py-3 text-brown">${r.order.total}</td>
-                    <td className="py-3">
-                      <div className="flex items-center gap-2">
-                        <Badge variant={statusVariant(r.order.status)}>{r.order.status}</Badge>
-                        <select
-                          className="h-9 rounded-md border border-brown/10 bg-white px-2 text-sm"
-                          value={r.order.status}
-                          onChange={(e) => updateStatus(r.order.id, e.target.value as Row['order']['status'])}
-                        >
-                          <option value="pending">pending</option>
-                          <option value="processing">processing</option>
-                          <option value="shipped">shipped</option>
-                          <option value="delivered">delivered</option>
-                          <option value="cancelled">cancelled</option>
-                        </select>
-                      </div>
+                    <td className="px-4 py-4 font-semibold text-brown">${r.order.total}</td>
+                    <td className="px-4 py-4">
+                      <select
+                        className="px-3 py-1 rounded-full text-sm font-semibold border-0 cursor-pointer"
+                        style={{
+                          backgroundColor: getStatusColor(r.order.status).split(' ')[0].replace('bg-', ''),
+                          color: getStatusColor(r.order.status).split(' ')[1].replace('text-', ''),
+                        }}
+                        value={r.order.status}
+                        onChange={(e) => updateStatus(r.order.id, e.target.value as Row['order']['status'])}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
                     </td>
-                    <td className="py-3 text-muted">{new Date(r.order.createdAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-4 text-sm text-muted">{new Date(r.order.createdAt).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
