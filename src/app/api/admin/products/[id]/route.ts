@@ -15,6 +15,9 @@ const patchSchema = z
     stock: z.number().int().min(0).optional(),
     images: z.array(z.string().url()).optional(),
     status: z.enum(['active', 'low-stock', 'out-of-stock']).optional(),
+    isFeatured: z.boolean().optional(),
+    isNew: z.boolean().optional(),
+    isSale: z.boolean().optional(),
   })
   .refine((v) => Object.keys(v).length > 0)
 
@@ -45,6 +48,9 @@ export async function PATCH(
   if (parsed.data.price !== undefined) update.price = parsed.data.price.toFixed(2)
   if (parsed.data.category !== undefined) update.category = parsed.data.category
   if (parsed.data.images !== undefined) update.images = parsed.data.images
+  if (parsed.data.isFeatured !== undefined) update.isFeatured = parsed.data.isFeatured
+  if (parsed.data.isNew !== undefined) update.isNew = parsed.data.isNew
+  if (parsed.data.isSale !== undefined) update.isSale = parsed.data.isSale
 
   if (parsed.data.stock !== undefined) {
     update.stock = parsed.data.stock

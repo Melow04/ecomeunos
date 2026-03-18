@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { CldUploadWidget } from 'next-cloudinary'
 
 import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,6 +19,9 @@ type Product = {
   stock: number
   status: 'active' | 'low-stock' | 'out-of-stock'
   images: string[]
+  isFeatured: boolean
+  isNew: boolean
+  isSale: boolean
   createdAt: string
 }
 
@@ -39,6 +43,7 @@ export default function AdminProductsPage() {
   const [q, setQ] = React.useState('')
 
   const [open, setOpen] = React.useState(false)
+  const [editingId, setEditingId] = React.useState<string | null>(null)
   const [draft, setDraft] = React.useState({
     name: '',
     description: '',
@@ -46,6 +51,9 @@ export default function AdminProductsPage() {
     category: 'camping' as Product['category'],
     stock: '0',
     image: '',
+    isFeatured: false,
+    isNew: false,
+    isSale: false,
   })
 
   async function load(query = '') {
@@ -60,28 +68,61 @@ export default function AdminProductsPage() {
     load()
   }, [])
 
-  async function createProduct() {
-    const res = await fetch('/api/admin/products', {
-      method: 'POST',
+  async function saveProduct() {
+    const url = editingId ? `/api/admin/products/${editingId}` : '/api/admin/products'
+    const method = editingId ? 'PATCH' : 'POST'
+    
+    const res = await fetch(url, {
+      method,
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         name: draft.name,
         description: draft.description,
-        price: Number(draft.price),
+        price: parseFloat(draft.price) || 0,
         category: draft.category,
         stock: parseInt(draft.stock || '0', 10) || 0,
         images: draft.image ? [draft.image] : [],
+        isFeatured: draft.isFeatured,
+        isNew: draft.isNew,
+        isSale: draft.isSale,
       }),
     })
     if (!res.ok) return
     setOpen(false)
-    setDraft({ name: '', description: '', price: '0', category: 'camping', stock: '0', image: '' })
+    setEditingId(null)
+    setDraft({ name: '', description: '', price: '0', category: 'camping', stock: '0', image: '', isFeatured: false, isNew: false, isSale: false })
     await load(q)
   }
 
+  function handleEdit(product: Product) {
+    setEditingId(product.id)
+    setDraft({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      category: product.category,
+      stock: product.stock.toString(),
+      image: product.images[0] || '',
+      isFeatured: product.isFeatured || false,
+      isNew: product.isNew || false,
+      isSale: product.isSale || false,
+    })
+    setOpen(true)
+  }
+
+  function handleAdd() {
+    setEditingId(null)
+    setDraft({ name: '', description: '', price: '0', category: 'camping', stock: '0', image: '', isFeatured: false, isNew: false, isSale: false })
+    setOpen(true)
+  }
+
   async function deleteProduct(id: string) {
+    if (!confirm('Are you sure you want to delete this product?')) return
     const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' })
-    if (!res.ok) return
+    if (!res.ok) {
+      alert('Failed to delete product')
+      return
+    }
     setItems((prev) => prev.filter((p) => p.id !== id))
   }
 
@@ -93,15 +134,13 @@ export default function AdminProductsPage() {
           <p className="mt-1 text-sm text-muted">Create, edit, and manage inventory</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Add Product
-            </Button>
-          </DialogTrigger>
+          <Button className="gap-2" onClick={handleAdd}>
+            <Plus className="h-4 w-4" />
+            Add Product
+          </Button>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Product</DialogTitle>
+              <DialogTitle>{editingId ? 'Edit Product' : 'Add New Product'}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4">
               <div>
@@ -155,20 +194,84 @@ export default function AdminProductsPage() {
                   <option value="footwear">Footwear</option>
                 </select>
               </div>
+              
+              <div className="grid grid-cols-3 gap-4 border-t border-b border-brown/10 py-4">
+                <label className="flex items-center gap-2 text-sm font-medium text-brown cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                    checked={draft.isFeatured}
+                    onChange={(e) => setDraft({ ...draft, isFeatured: e.target.checked })}
+                  />
+                  Featured
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium text-brown cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                    checked={draft.isNew}
+                    onChange={(e) => setDraft({ ...draft, isNew: e.target.checked })}
+                  />
+                  New Arrival
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium text-brown cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                    checked={draft.isSale}
+                    onChange={(e) => setDraft({ ...draft, isSale: e.target.checked })}
+                  />
+                  On Sale
+                </label>
+              </div>
+
               <div>
-                <label className="text-sm font-medium text-brown">Image URL (optional)</label>
-                <Input
-                  placeholder="https://example.com/image.jpg"
-                  value={draft.image}
-                  onChange={(e) => setDraft({ ...draft, image: e.target.value })}
-                  className="mt-1"
-                />
+                <label className="text-sm font-medium text-brown mb-1 block">Product Image</label>
+                <div className="flex items-center gap-4">
+                  {draft.image && (
+                    <img src={draft.image} alt="Preview" className="w-16 h-16 object-cover rounded-md border" />
+                  )}
+                  <CldUploadWidget 
+                    onSuccess={(result: any) => {
+                      if (result.info?.secure_url) {
+                        setDraft({ ...draft, image: result.info.secure_url })
+                      }
+                    }}
+                    options={{ 
+                      maxFiles: 1,
+                      styles: {
+                        palette: {
+                          window: '#FFFFFF',
+                          sourceBg: '#F3F0E8',
+                          windowBorder: '#9CA986',
+                          tabIcon: '#3D3D37',
+                          inactiveTabIcon: '#8B8B85',
+                          menuIcons: '#3D3D37',
+                          link: '#9CA986',
+                          action: '#9CA986',
+                          inProgress: '#9CA986',
+                          complete: '#9CA986',
+                          error: '#D14343',
+                          textDark: '#1A1A1A',
+                          textLight: '#FFFFFF'
+                        }
+                      }
+                    }}
+                    uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "default_preset"}
+                  >
+                    {({ open }) => (
+                      <Button type="button" variant="secondary" onClick={() => open()}>
+                        Upload Image
+                      </Button>
+                    )}
+                  </CldUploadWidget>
+                </div>
               </div>
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="secondary" onClick={() => setOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={createProduct}>Create Product</Button>
+                <Button onClick={saveProduct}>{editingId ? 'Save Changes' : 'Create Product'}</Button>
               </div>
             </div>
           </DialogContent>
@@ -183,6 +286,7 @@ export default function AdminProductsPage() {
               placeholder="Search for products..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && load(q)}
               className="pl-10"
             />
           </div>
@@ -221,7 +325,12 @@ export default function AdminProductsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-4 flex gap-2">
-                      <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-blue-600 hover:bg-blue-50"
+                        onClick={() => handleEdit(p)}
+                      >
                         <Edit2 className="h-4 w-4" />
                       </Button>
                       <Button

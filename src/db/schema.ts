@@ -1,4 +1,5 @@
 import {
+  boolean,
   integer,
   numeric,
   pgEnum,
@@ -53,6 +54,9 @@ export const products = pgTable('products', {
   stock: integer('stock').notNull(),
   status: productStatusEnum('status').notNull().default('active'),
   images: text('images').array().notNull().default([]),
+  isFeatured: boolean('is_featured').notNull().default(false),
+  isNew: boolean('is_new').notNull().default(false),
+  isSale: boolean('is_sale').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

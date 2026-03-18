@@ -71,8 +71,11 @@ export default async function ProductDetailsPage({
         {/* Info */}
         <div className="space-y-6">
           {/* Category and Badges */}
-          <div>
+          <div className="flex gap-2 flex-wrap">
             <Badge variant="secondary" className="uppercase text-xs">{product.category}</Badge>
+            {product.isSale && <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">SALE</span>}
+            {product.isNew && <span className="rounded-full bg-blue-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">NEW</span>}
+            {product.isFeatured && <span className="rounded-full bg-brand-gold px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">FEATURED</span>}
           </div>
 
           {/* Title and Price */}
@@ -80,7 +83,7 @@ export default async function ProductDetailsPage({
             <h1 className="text-3xl font-bold text-brown">{product.name}</h1>
             <div className="mt-4 flex items-baseline gap-2">
               <div className="text-3xl font-bold text-brown">${product.price}</div>
-              <div className="text-lg text-muted line-through">$349.99</div>
+              {product.isSale && <div className="text-lg text-muted line-through">${(parseFloat(product.price) * 1.2).toFixed(2)}</div>}
             </div>
           </div>
 

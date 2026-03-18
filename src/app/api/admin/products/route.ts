@@ -13,6 +13,9 @@ const createSchema = z.object({
   category: z.enum(['camping', 'hiking', 'clothing', 'footwear']),
   stock: z.number().int().min(0),
   images: z.array(z.string().url()).default([]),
+  isFeatured: z.boolean().default(false),
+  isNew: z.boolean().default(false),
+  isSale: z.boolean().default(false),
 })
 
 function statusFromStock(stock: number): 'active' | 'low-stock' | 'out-of-stock' {
@@ -60,6 +63,9 @@ export async function POST(req: Request) {
       stock: parsed.data.stock,
       status: statusFromStock(parsed.data.stock),
       images: parsed.data.images,
+      isFeatured: parsed.data.isFeatured,
+      isNew: parsed.data.isNew,
+      isSale: parsed.data.isSale,
     })
     .returning()
 

@@ -16,10 +16,13 @@ function statusVariant(status: string): BadgeVariant {
 }
 
 function getStatusBadgeColor(status: string) {
-  if (status === 'pending') return 'bg-yellow-100 text-yellow-800'
-  if (status === 'processing' || status === 'shipped') return 'bg-blue-100 text-blue-800'
-  if (status === 'delivered') return 'bg-green-100 text-green-800'
-  return 'bg-red-100 text-red-800'
+  switch(status) {
+    case 'pending': return 'bg-yellow-100 text-yellow-800'
+    case 'processing':
+    case 'shipped': return 'bg-blue-100 text-blue-800'
+    case 'delivered': return 'bg-green-100 text-green-800'
+    default: return 'bg-red-100 text-red-800'
+  }
 }
 
 export default async function AdminDashboardPage() {
@@ -38,40 +41,31 @@ export default async function AdminDashboardPage() {
       value: `$${revenueRows[0]?.sum ?? '0.00'}`,
       change: '+12.5%',
       icon: TrendingUp,
-      bgColor: 'bg-green-100',
-      iconColor: 'text-green-600',
     },
     {
-      label: 'Total Orders',
+      label: 'Active Orders',
       value: String(Number(ordersRows[0]?.count ?? 0)),
       change: '+8.2%',
       icon: ShoppingBag,
-      bgColor: 'bg-blue-100',
-      iconColor: 'text-blue-600',
+    },
+    {
+      label: 'Total Customers',
+      value: String(Number(customersRows[0]?.count ?? 0)),
+      change: '+15.3%',
+      icon: Users,
     },
     {
       label: 'Products',
       value: String(Number(productsRows[0]?.count ?? 0)),
-      change: '+3',
+      change: '+3.1%',
       icon: Package,
-      bgColor: 'bg-purple-100',
-      iconColor: 'text-purple-600',
-    },
-    {
-      label: 'Customers',
-      value: String(Number(customersRows[0]?.count ?? 0)),
-      change: '+125',
-      icon: Users,
-      bgColor: 'bg-green-100',
-      iconColor: 'text-green-600',
-    },
+    }
   ]
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-bold text-brown">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted">Key metrics and recent activity</p>
+        <h1 className="text-[32px] font-bold text-black tracking-tight">Dashboard</h1>
       </div>
 
       {/* Metrics Cards */}
@@ -79,15 +73,18 @@ export default async function AdminDashboardPage() {
         {metrics.map((metric) => {
           const Icon = metric.icon
           return (
-            <Card key={metric.label} className="p-6 border-0 shadow-sm">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs font-semibold text-muted uppercase">{metric.label}</p>
-                  <p className="mt-3 text-3xl font-bold text-brown">{metric.value}</p>
-                  <p className="mt-2 text-xs font-semibold text-green-600">{metric.change}</p>
+            <Card key={metric.label} className="p-6 border border-black/10 shadow-sm rounded-xl">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3 text-black/70">
+                  <Icon className="h-5 w-5" />
+                  <span className="font-semibold text-sm">{metric.label}</span>
                 </div>
-                <div className={`rounded-lg p-3 ${metric.bgColor}`}>
-                  <Icon className={`h-6 w-6 ${metric.iconColor}`} />
+                <div>
+                  <div className="text-[32px] font-black text-black leading-none">{metric.value}</div>
+                  <div className="mt-2 text-sm font-semibold text-green-700 flex items-center gap-1">
+                    <TrendingUp className="h-4 w-4" />
+                    {metric.change}
+                  </div>
                 </div>
               </div>
             </Card>
@@ -96,34 +93,40 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Recent Orders */}
-      <Card className="p-6 border-0 shadow-sm">
-        <h2 className="text-lg font-bold text-brown mb-6">Recent Orders</h2>
-
+      <h2 className="text-xl font-bold text-black pt-4">Recent Orders</h2>
+      <Card className="border border-black/10 shadow-sm rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-brown/10">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Order ID</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Customer</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Amount</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Date</th>
+          <table className="w-full text-left text-sm whitespace-nowrap">
+            <thead className="bg-[#f0ece1] text-black">
+              <tr>
+                <th className="px-6 py-4 font-bold">Order ID</th>
+                <th className="px-6 py-4 font-bold">Customer</th>
+                <th className="px-6 py-4 font-bold">Amount</th>
+                <th className="px-6 py-4 font-bold">Status</th>
+                <th className="px-6 py-4 font-bold">Date</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-black/10 bg-white">
               {recent.map((o) => (
-                <tr key={o.id} className="border-b border-brown/10 hover:bg-brown/2">
-                  <td className="px-4 py-4 font-semibold text-brown">{o.id}</td>
-                  <td className="px-4 py-4 text-sm text-muted">Customer</td>
-                  <td className="px-4 py-4 font-semibold text-brown">${o.total}</td>
-                  <td className="px-4 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadgeColor(o.status)}`}>
+                <tr key={o.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 font-bold text-black">{o.id}</td>
+                  <td className="px-6 py-4 font-medium text-black/70">Customer</td>
+                  <td className="px-6 py-4 font-bold text-black">${o.total}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusBadgeColor(o.status)}`}>
                       {o.status.charAt(0).toUpperCase() + o.status.slice(1)}
                     </span>
                   </td>
-                  <td className="px-4 py-4 text-sm text-muted">{new Date(o.createdAt).toLocaleDateString()}</td>
+                  <td className="px-6 py-4 font-medium text-black/70">{new Date(o.createdAt).toLocaleDateString()}</td>
                 </tr>
               ))}
+              {recent.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-black/60">
+                    No recent orders.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

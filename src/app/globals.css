@@ -4,10 +4,11 @@
   --background: #FFFFFF;
   --foreground: #1A1A1A;
 
-  --brand-primary: #A8B896;
-  --brand-brown: #3D3D37;
-  --brand-beige: #F3F0E8;
-  --brand-gold: #C8961E;
+  --brand-primary: #9CA986; /* Sage green from designs */
+  --brand-brown: #3D3D37; /* Dark text/brown from designs */
+  --brand-beige: #F3F0E8; /* Light beige backgrounds */
+  --brand-gold: #C8961E; /* Accent/stats gold */
+  --brand-danger: #D14343;
   --text-muted: #8B8B85;
 }
 
@@ -17,14 +18,15 @@
   --color-brown: var(--brand-brown);
   --color-beige: var(--brand-beige);
   --color-gold: var(--brand-gold);
+  --color-danger: var(--brand-danger);
   --color-muted: var(--text-muted);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-mono: monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground: #ededed;
+    --foreground: #5e5c5c;
   }
 }
 
@@ -32,4 +34,19 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+/* Fix for Cloudinary widget appearing behind or being unclickable due to Radix UI Dialog */
+body[data-scroll-locked] iframe[src*="cloudinary"],
+body[data-scroll-locked] div[class*="cloudinary"],
+body[data-scroll-locked] div[id*="cloudinary"],
+body[data-scroll-locked] .uw-widget-wrap {
+  pointer-events: auto !important;
+}
+
+.uw-widget-wrap,
+#cloudinary-overlay,
+.cloudinary-overlay,
+iframe[src*="cloudinary"] {
+  z-index: 999999 !important;
 }

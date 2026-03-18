@@ -2,8 +2,7 @@ import { getDb } from '@/db'
 import { products } from '@/db/schema'
 import { FilterSidebar } from '@/components/product/FilterSidebar'
 import { ProductCard, type ProductForCard } from '@/components/product/ProductCard'
-import { Card } from '@/components/ui/card'
-import { and, asc, desc, gte, inArray, lte, sql } from 'drizzle-orm'
+import { and, asc, desc, gte, inArray, lte, sql, ilike } from 'drizzle-orm'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -49,13 +48,15 @@ export default async function ProductsPage({
   const maxPrice = parseNumber(typeof sp.maxPrice === 'string' ? sp.maxPrice : null)
   const sort = typeof sp.sort === 'string' ? sp.sort : 'newest'
   const page = Math.max(1, parseInt(typeof sp.page === 'string' ? sp.page : '1', 10) || 1)
+  const q = typeof sp.q === 'string' ? sp.q.trim() : ''
   const pageSize = 12
   const offset = (page - 1) * pageSize
 
   const where = and(
     categories.length > 0 ? inArray(products.category, categories) : undefined,
     minPrice !== null ? gte(products.price, String(minPrice.toFixed(2))) : undefined,
-    maxPrice !== null ? lte(products.price, String(maxPrice.toFixed(2))) : undefined
+    maxPrice !== null ? lte(products.price, String(maxPrice.toFixed(2))) : undefined,
+    q ? ilike(products.name, `%${q}%`) : undefined
   )
 
   const orderBy =
@@ -77,110 +78,113 @@ export default async function ProductsPage({
   const baseParams = toParams(sp)
 
   return (
-    <div className="grid gap-6 md:grid-cols-[260px_1fr]">
-      <FilterSidebar />
-      <div>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-semibold text-brown">Product Catalog</h1>
-            <div className="mt-1 text-sm text-muted">{total} items</div>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-muted">Sort</span>
-            <div className="flex gap-2">
-              <Link
-                className={
-                  sortParam === 'newest'
-                    ? 'rounded-md bg-brown/10 px-2 py-1 text-brown'
-                    : 'rounded-md px-2 py-1 text-brown/70 hover:bg-brown/5'
-                }
-                href={`/products?${(() => {
-                  const p = new URLSearchParams(baseParams)
-                  p.set('sort', 'newest')
-                  p.set('page', '1')
-                  return p.toString()
-                })()}`}
-              >
-                Newest
-              </Link>
-              <Link
-                className={
-                  sortParam === 'price-asc'
-                    ? 'rounded-md bg-brown/10 px-2 py-1 text-brown'
-                    : 'rounded-md px-2 py-1 text-brown/70 hover:bg-brown/5'
-                }
-                href={`/products?${(() => {
-                  const p = new URLSearchParams(baseParams)
-                  p.set('sort', 'price-asc')
-                  p.set('page', '1')
-                  return p.toString()
-                })()}`}
-              >
-                Price ↑
-              </Link>
-              <Link
-                className={
-                  sortParam === 'price-desc'
-                    ? 'rounded-md bg-brown/10 px-2 py-1 text-brown'
-                    : 'rounded-md px-2 py-1 text-brown/70 hover:bg-brown/5'
-                }
-                href={`/products?${(() => {
-                  const p = new URLSearchParams(baseParams)
-                  p.set('sort', 'price-desc')
-                  p.set('page', '1')
-                  return p.toString()
-                })()}`}
-              >
-                Price ↓
-              </Link>
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="grid gap-12 md:grid-cols-[280px_1fr]">
+        <FilterSidebar />
+        <div>
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+            <div>
+              <h1 className="text-4xl font-black text-black tracking-tight">Outdoor Equipment</h1>
+              <div className="mt-2 text-sm font-medium text-black/60">Showing {total} products</div>
+            </div>
+            <div className="flex items-center gap-3 text-sm font-semibold">
+              <span className="text-black/60">Sort by:</span>
+              <div className="flex gap-2">
+                <Link
+                  className={
+                    sortParam === 'newest'
+                      ? 'rounded-md bg-black text-white px-3 py-1.5'
+                      : 'rounded-md px-3 py-1.5 text-black border border-black/10 hover:bg-black/5'
+                  }
+                  href={`/products?${(() => {
+                    const p = new URLSearchParams(baseParams)
+                    p.set('sort', 'newest')
+                    p.set('page', '1')
+                    return p.toString()
+                  })()}`}
+                >
+                  Newest
+                </Link>
+                <Link
+                  className={
+                    sortParam === 'price-asc'
+                      ? 'rounded-md bg-black text-white px-3 py-1.5'
+                      : 'rounded-md px-3 py-1.5 text-black border border-black/10 hover:bg-black/5'
+                  }
+                  href={`/products?${(() => {
+                    const p = new URLSearchParams(baseParams)
+                    p.set('sort', 'price-asc')
+                    p.set('page', '1')
+                    return p.toString()
+                  })()}`}
+                >
+                  Lowest Price
+                </Link>
+                <Link
+                  className={
+                    sortParam === 'price-desc'
+                      ? 'rounded-md bg-black text-white px-3 py-1.5'
+                      : 'rounded-md px-3 py-1.5 text-black border border-black/10 hover:bg-black/5'
+                  }
+                  href={`/products?${(() => {
+                    const p = new URLSearchParams(baseParams)
+                    p.set('sort', 'price-desc')
+                    p.set('page', '1')
+                    return p.toString()
+                  })()}`}
+                >
+                  Highest Price
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((p) => (
-            <ProductCard key={p.id} product={p as unknown as ProductForCard} />
-          ))}
-        </div>
-
-        <Card className="mt-6 bg-white p-4">
-          <div className="flex items-center justify-between text-sm">
-            <div className="text-muted">
-              Page {page} of {totalPages}
-            </div>
-            <div className="flex gap-2">
-              <Link
-                className={
-                  page <= 1
-                    ? 'pointer-events-none rounded-md border border-brown/10 px-3 py-1 text-muted'
-                    : 'rounded-md border border-brown/10 px-3 py-1 text-brown hover:bg-brown/5'
-                }
-                href={`/products?${(() => {
-                  const p = new URLSearchParams(baseParams)
-                  p.set('page', String(Math.max(1, page - 1)))
-                  return p.toString()
-                })()}`}
-              >
-                Prev
-              </Link>
-              <Link
-                className={
-                  page >= totalPages
-                    ? 'pointer-events-none rounded-md border border-brown/10 px-3 py-1 text-muted'
-                    : 'rounded-md border border-brown/10 px-3 py-1 text-brown hover:bg-brown/5'
-                }
-                href={`/products?${(() => {
-                  const p = new URLSearchParams(baseParams)
-                  p.set('page', String(Math.min(totalPages, page + 1)))
-                  return p.toString()
-                })()}`}
-              >
-                Next
-              </Link>
-            </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((p) => (
+              <ProductCard key={p.id} product={p as unknown as ProductForCard} />
+            ))}
           </div>
-        </Card>
+
+          {totalPages > 1 && (
+            <div className="mt-12 flex items-center justify-between border-t border-black/10 pt-6 text-sm font-bold">
+              <div className="text-black/60">
+                Page {page} of {totalPages}
+              </div>
+              <div className="flex gap-2">
+                <Link
+                  className={
+                    page <= 1
+                      ? 'pointer-events-none rounded-md px-4 py-2 border border-black/10 text-black/40'
+                      : 'rounded-md px-4 py-2 border border-black/20 text-black hover:bg-black/5 transition'
+                  }
+                  href={`/products?${(() => {
+                    const p = new URLSearchParams(baseParams)
+                    p.set('page', String(Math.max(1, page - 1)))
+                    return p.toString()
+                  })()}`}
+                >
+                  Previous
+                </Link>
+                <Link
+                  className={
+                    page >= totalPages
+                      ? 'pointer-events-none rounded-md px-4 py-2 border border-black/10 text-black/40'
+                      : 'rounded-md px-4 py-2 border border-black/20 text-black hover:bg-black/5 transition'
+                  }
+                  href={`/products?${(() => {
+                    const p = new URLSearchParams(baseParams)
+                    p.set('page', String(Math.min(totalPages, page + 1)))
+                    return p.toString()
+                  })()}`}
+                >
+                  Next
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
+

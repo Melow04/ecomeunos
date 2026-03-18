@@ -2,6 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import * as React from 'react'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -38,6 +39,9 @@ export function AddToCartPanel({
       } else {
         addGuestItem(productId, quantity)
       }
+      toast.success(`Added ${quantity} item(s) to cart`)
+    } catch (err) {
+      toast.error('Failed to add item to cart')
     } finally {
       setBusy(false)
     }

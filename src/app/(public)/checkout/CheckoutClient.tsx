@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import * as React from 'react'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -190,19 +191,23 @@ export default function CheckoutClient() {
       if (!res.ok) {
         setError(data?.error ?? 'Order failed')
         if ((data?.error ?? '') === 'Invalid payload') goTo(1)
+        toast.error('Failed to submit order')
         return
       }
 
       const orderId = data?.id as string | undefined
       if (!orderId) {
         setError('Order created but response was missing an id.')
+        toast.error('Order creation failed on the server')
         return
       }
 
       if (!session?.user?.id) clearGuest()
+      toast.success('Order placed successfully!')
       router.push(`/order-confirmation/${orderId}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Order failed')
+      toast.error('An unexpected error occurred')
     } finally {
       setBusy(false)
     }

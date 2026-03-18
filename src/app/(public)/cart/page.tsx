@@ -134,10 +134,10 @@ export default function CartPage() {
   const total = subtotal + shipping + tax
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
       <div>
-        <h1 className="text-3xl font-bold text-brown">Shopping Cart</h1>
-        <p className="mt-1 text-sm text-muted">{lineItems.length} item{lineItems.length !== 1 ? 's' : ''}</p>
+        <h1 className="text-[32px] font-bold text-brown">Shopping Cart</h1>
+        <p className="mt-1 text-base font-semibold text-brown/70">{lineItems.length} item{lineItems.length !== 1 ? 's' : ''}</p>
       </div>
 
       <div className="grid gap-8 md:grid-cols-[1fr_400px]">
@@ -153,100 +153,91 @@ export default function CartPage() {
               </Button>
             </Card>
           ) : (
-            lineItems.map((i) => (
-              <Card key={i.key} className="overflow-hidden">
-                <div className="flex gap-4 p-4">
-                  {/* Product Image */}
-                  <div className="relative w-24 h-24 flex-shrink-0 rounded-lg bg-beige overflow-hidden">
-                    <Image
-                      src={i.image}
-                      alt={i.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="flex-1 min-w-0">
-                    <Link href={`/products/${i.id}`} className="font-semibold text-brown hover:underline line-clamp-2">
-                      {i.name}
-                    </Link>
-                    <p className="mt-1 text-sm text-muted">{i.max > 0 ? `In stock: ${i.max} available` : 'Out of stock'}</p>
-                    <div className="mt-3 text-lg font-bold text-brown">${money(i.price)}</div>
-                  </div>
-
-                  {/* Quantity and Remove */}
-                  <div className="flex flex-col items-end justify-between">
-                    <button
-                      onClick={i.onRemove}
-                      className="text-muted hover:text-brown transition"
-                      aria-label="Remove item"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => i.onQuantity(Math.max(1, i.quantity - 1))}
-                        className="px-2 py-1 border border-brown/20 rounded hover:bg-brown/5"
-                      >
-                        −
-                      </button>
-                      <span className="w-8 text-center font-semibold text-brown">{i.quantity}</span>
-                      <button
-                        onClick={() => i.onQuantity(Math.min(i.max, i.quantity + 1))}
-                        className="px-2 py-1 border border-brown/20 rounded hover:bg-brown/5"
-                      >
-                        +
-                      </button>
+            <>
+              {lineItems.map((i) => (
+                <Card key={i.key} className="overflow-hidden border border-black/10 rounded-md shadow-sm">
+                  <div className="flex gap-6 p-6 items-center">
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/products/${i.id}`} className="font-bold text-lg text-black hover:underline line-clamp-2">
+                        {i.name}
+                      </Link>
+                      <p className="mt-1 text-sm font-semibold uppercase tracking-wider text-muted">TENTS</p>
+                      
+                      <div className="mt-4 flex items-center gap-2">
+                        <button
+                          onClick={() => i.onQuantity(Math.max(1, i.quantity - 1))}
+                          className="flex h-7 w-7 items-center justify-center rounded bg-gray-200 text-brown font-bold hover:bg-gray-300"
+                        >
+                          −
+                        </button>
+                        <span className="w-8 text-center font-bold text-lg text-brown">{i.quantity}</span>
+                        <button
+                          onClick={() => i.onQuantity(Math.min(i.max, i.quantity + 1))}
+                          className="flex h-7 w-7 items-center justify-center rounded bg-gray-200 text-brown font-bold hover:bg-gray-300"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
-                    <div className="text-right font-semibold text-brown">${money(i.price * i.quantity)}</div>
-                  </div>
-                </div>
-              </Card>
-            ))
-          )}
 
-          {lineItems.length > 0 && (
-            <Button asChild variant="secondary" className="w-full">
-              <Link href="/products">Continue Shopping</Link>
-            </Button>
+                    <div className="flex flex-col items-end gap-6 justify-between self-stretch">
+                      {/* Price and trash could be arranged here, mock shows price then trash icon */}
+                      <div className="flex items-center gap-6 mt-auto">
+                        <div className="text-xl font-black text-black">$ {money(i.price * i.quantity)}</div>
+                        <button
+                          onClick={i.onRemove}
+                          className="text-red-600 hover:text-red-700 transition"
+                          aria-label="Remove item"
+                        >
+                          <Trash2 className="h-6 w-6 stroke-[2.5]" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+              <div className="pt-2">
+                <button className="text-sm font-black text-red-600 hover:underline">
+                  Clear All Items
+                </button>
+              </div>
+            </>
           )}
         </div>
 
         {/* Order Summary Sidebar */}
         {lineItems.length > 0 && (
           <div className="space-y-4">
-            <Card className="p-6">
-              <h2 className="font-bold text-brown text-lg mb-4">Order Summary</h2>
+            <Card className="p-8 border border-black/10 rounded-md shadow-sm">
+              <h2 className="font-black text-black text-xl mb-6">Order Summary</h2>
 
-              <div className="space-y-3 text-sm border-b border-brown/10 pb-4">
-                <div className="flex justify-between">
-                  <span className="text-muted">Subtotal</span>
-                  <span className="font-semibold text-brown">${money(subtotal)}</span>
+              <div className="space-y-4 text-base border-b border-black/10 pb-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-brown/70 font-medium">Subtotal</span>
+                  <span className="font-bold text-black">$ {money(subtotal)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted">Shipping</span>
-                  <span className="font-semibold text-brown">${money(shipping)}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-brown/70 font-medium">Shipping</span>
+                  <span className="font-bold text-black">${money(shipping)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted">Tax (8%)</span>
-                  <span className="font-semibold text-brown">${money(tax)}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-brown/70 font-medium">Tax(8%)</span>
+                  <span className="font-bold text-black">${money(tax)}</span>
                 </div>
               </div>
 
-              <div className="mt-4 flex justify-between items-center">
-                <span className="font-bold text-brown">Total</span>
-                <span className="text-2xl font-bold text-brown">${money(total)}</span>
+              <div className="mt-6 space-y-4">
+                <Button asChild className="w-full bg-[#8b9168] hover:bg-[#7a805c] text-white font-bold h-12 shadow-none rounded-md">
+                  <Link href="/checkout?step=1">Proceed to Checkout</Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full border border-black/20 text-black font-bold h-12 shadow-none rounded-md">
+                  <Link href="/products">Continue Shopping</Link>
+                </Button>
               </div>
 
-              <Button asChild className="w-full mt-6">
-                <Link href="/checkout?step=1">Proceed to Checkout</Link>
-              </Button>
-            </Card>
-
-            <Card className="p-4">
-              <h3 className="font-semibold text-brown text-sm mb-3">Security</h3>
-              <p className="text-xs text-muted">Secure checkout with encrypted payment processing.</p>
+              <div className="mt-6 pt-6 border-t border-black/10 text-center">
+                <p className="text-black/70 font-medium text-sm">Secure Checkout</p>
+              </div>
             </Card>
           </div>
         )}
