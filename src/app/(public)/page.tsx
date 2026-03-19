@@ -56,7 +56,7 @@ export default async function StorefrontPage() {
                 name: 'Camping',
                 description: 'Tents, sleeping bags, and essential camping gear',
                 href: '/products?category=camping',
-                image: 'https://images.unsplash.com/photo-1504280390227-bb25b84e3065?auto=format&fit=crop&w=400&q=80',
+                image: 'https://cdnp.flypgs.com/files/Ekstrem_Sporlar/camping-kampcilik-nedir.jpg',
               },
               {
                 name: 'Hiking',
