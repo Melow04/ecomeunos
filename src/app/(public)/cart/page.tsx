@@ -52,6 +52,8 @@ export default function CartPage() {
   const [userItems, setUserItems] = React.useState<UserCartItem[]>([])
   const [guestProducts, setGuestProducts] = React.useState<Record<string, Product>>({})
   const [loading, setLoading] = React.useState(false)
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set())
+  const [hasInitializedSelection, setHasInitializedSelection] = React.useState(false)
 
   React.useEffect(() => {
     if (!hydrated) hydrate()
@@ -128,8 +130,17 @@ export default function CartPage() {
         })
         .filter(isLineItem)
 
-  const subtotal = lineItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
-  const shipping = lineItems.length > 0 ? 9.99 : 0
+  React.useEffect(() => {
+    if (!hasInitializedSelection && lineItems.length > 0) {
+      setSelectedIds(new Set(lineItems.map(i => i.id)))
+      setHasInitializedSelection(true)
+    }
+  }, [lineItems, hasInitializedSelection])
+
+  const selectedLineItems = lineItems.filter(i => selectedIds.has(i.id))
+
+  const subtotal = selectedLineItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
+  const shipping = selectedLineItems.length > 0 ? 9.99 : 0
   const tax = subtotal * 0.08
   const total = subtotal + shipping + tax
 
@@ -157,6 +168,20 @@ export default function CartPage() {
               {lineItems.map((i) => (
                 <Card key={i.key} className="overflow-hidden border border-black/10 rounded-md shadow-sm">
                   <div className="flex gap-6 p-6 items-center">
+                    <input 
+                      type="checkbox" 
+                      className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+                      checked={selectedIds.has(i.id)}
+                      onChange={(e) => {
+                        const newSelected = new Set(selectedIds)
+                        if (e.target.checked) newSelected.add(i.id)
+                        else newSelected.delete(i.id)
+                        setSelectedIds(newSelected)
+                      }}
+                    />
+                    <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md bg-gray-200">
+                      <Image src={i.image} alt={i.name} fill className="object-cover" sizes="96px" />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <Link href={`/products/${i.id}`} className="font-bold text-lg text-black hover:underline line-clamp-2">
                         {i.name}
@@ -227,8 +252,8 @@ export default function CartPage() {
               </div>
 
               <div className="mt-6 space-y-4">
-                <Button asChild className="w-full bg-[#8b9168] hover:bg-[#7a805c] text-white font-bold h-12 shadow-none rounded-md">
-                  <Link href="/checkout?step=1">Proceed to Checkout</Link>
+                  <Button asChild disabled={selectedIds.size === 0} className={`w-full bg-[#8b9168] hover:bg-[#7a805c] text-white font-bold h-12 shadow-none rounded-md ${selectedIds.size === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <Link href={`/checkout?step=1&items=${Array.from(selectedIds).join(',')}`} style={{ pointerEvents: selectedIds.size === 0 ? 'none' : 'auto' }}>Proceed to Checkout</Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full border border-black/20 text-black font-bold h-12 shadow-none rounded-md">
                   <Link href="/products">Continue Shopping</Link>

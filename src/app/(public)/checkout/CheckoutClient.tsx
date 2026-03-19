@@ -52,12 +52,19 @@ export default function CheckoutClient() {
   const step = Math.min(3, Math.max(1, parseInt(searchParams.get('step') ?? '1', 10) || 1))
 
   const { data: session, status } = useSession()
-  const { hydrated, hydrate, guestItems, clearGuest } = useCart()
+  const { hydrated, hydrate, guestItems, clearGuest, removeGuestItem } = useCart()
+
+  const selectedItemsParam = searchParams.get('items')
+  const selectedProductIds = React.useMemo(() => {
+    if (!selectedItemsParam) return null
+    return new Set(selectedItemsParam.split(',').filter(Boolean))
+  }, [selectedItemsParam])
 
   const [guestLines, setGuestLines] = React.useState<GuestLine[]>([])
   const [userCartItems, setUserCartItems] = React.useState<UserCartItem[]>([])
   const [shippingMethod, setShippingMethod] = React.useState<'standard' | 'express' | 'overnight'>('standard')
   const [paymentMethod, setPaymentMethod] = React.useState<'card' | 'ewallet' | 'cod'>('card')
+  const [saveInfo, setSaveInfo] = React.useState(true)
   const [busy, setBusy] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -82,9 +89,19 @@ export default function CheckoutClient() {
 
   React.useEffect(() => {
     if (status === 'authenticated') {
-      setForm((f) => ({ ...f, email: session?.user?.email ?? f.email }))
+      const saved = window.localStorage.getItem(`eunos_saved_info_${session?.user?.id}`)
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+          setForm((f) => ({ ...f, ...parsed, email: session?.user?.email ?? parsed.email ?? f.email }))
+        } catch {
+          setForm((f) => ({ ...f, email: session?.user?.email ?? f.email }))
+        }
+      } else {
+        setForm((f) => ({ ...f, email: session?.user?.email ?? f.email }))
+      }
     }
-  }, [status, session?.user?.email])
+  }, [status, session?.user?.id, session?.user?.email])
 
   React.useEffect(() => {
     if (status !== 'authenticated') return
@@ -109,11 +126,13 @@ export default function CheckoutClient() {
   }, [guestItems, hydrated, session?.user?.id])
 
   const subtotal = session?.user?.id
-    ? userCartItems.reduce((sum, i) => sum + Number(i.product.price) * i.quantity, 0)
-    : guestLines.reduce((sum, l) => sum + Number(l.product.price) * l.quantity, 0)
+    ? userCartItems.filter(i => !selectedProductIds || selectedProductIds.has(i.product.id)).reduce((sum, i) => sum + Number(i.product.price) * i.quantity, 0)
+    : guestLines.filter(l => !selectedProductIds || selectedProductIds.has(l.productId)).reduce((sum, l) => sum + Number(l.product.price) * l.quantity, 0)
   const shippingCost = shippingMethod === 'standard' ? 9.99 : shippingMethod === 'express' ? 19.99 : 39.99
   const tax = subtotal * 0.08
-  const hasItems = session?.user?.id ? userCartItems.length > 0 : guestLines.length > 0
+  const hasItems = session?.user?.id 
+    ? userCartItems.filter(i => !selectedProductIds || selectedProductIds.has(i.product.id)).length > 0 
+    : guestLines.filter(l => !selectedProductIds || selectedProductIds.has(l.productId)).length > 0
   const total = subtotal + (hasItems ? shippingCost : 0) + tax
 
   function goTo(nextStep: number) {
@@ -179,7 +198,11 @@ export default function CheckoutClient() {
       }
 
       if (!session?.user?.id) {
-        payload.items = guestLines.map((l) => ({ productId: l.productId, quantity: l.quantity }))
+        payload.items = guestLines.filter(l => !selectedProductIds || selectedProductIds.has(l.productId)).map((l) => ({ productId: l.productId, quantity: l.quantity }))
+      } else {
+        if (selectedProductIds) {
+          payload.items = userCartItems.filter(i => selectedProductIds.has(i.product.id)).map(i => ({ productId: i.product.id, quantity: i.quantity }))
+        }
       }
 
       const res = await fetch('/api/orders', {
@@ -202,7 +225,25 @@ export default function CheckoutClient() {
         return
       }
 
-      if (!session?.user?.id) clearGuest()
+      if (!session?.user?.id) {
+        if (selectedProductIds) {
+          payload.items?.forEach(i => removeGuestItem(i.productId))
+        } else {
+          clearGuest()
+        }
+      }
+      else if (saveInfo) {
+        window.localStorage.setItem(`eunos_saved_info_${session.user.id}`, JSON.stringify({
+          firstName: payload.step1.firstName,
+          lastName: payload.step1.lastName,
+          email: payload.step1.email,
+          phone: payload.step1.phone,
+          street: payload.step1.street,
+          city: payload.step1.city,
+          state: payload.step1.state,
+          zip: payload.step1.zip,
+        }))
+      }
       toast.success('Order placed successfully!')
       router.push(`/order-confirmation/${orderId}`)
     } catch (err) {
@@ -247,6 +288,12 @@ export default function CheckoutClient() {
                 <Input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
                 <Input placeholder="State" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
                 <Input placeholder="ZIP" value={form.zip} onChange={(e) => setForm({ ...form, zip: e.target.value })} />
+                {status === 'authenticated' && (
+                  <div className="md:col-span-2 flex items-center gap-2 mt-2">
+                    <input type="checkbox" id="saveInfo" checked={saveInfo} onChange={(e) => setSaveInfo(e.target.checked)} className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4" />
+                    <label htmlFor="saveInfo" className="text-sm text-brown">Save this information for next time</label>
+                  </div>
+                )}
                 <div className="md:col-span-2 flex justify-end">
                   <Button onClick={() => goTo(2)}>Continue</Button>
                 </div>

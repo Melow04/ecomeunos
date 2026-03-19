@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { getDb } from '@/db'
 import { products } from '@/db/schema'
 import { AddToCartPanel } from '@/components/product/AddToCartPanel'
+import { ProductWishlistButton } from '@/components/product/ProductWishlistButton'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { ProductCard } from '@/components/product/ProductCard'
@@ -106,8 +107,11 @@ export default async function ProductDetailsPage({
           </div>
 
           {/* Quantity and Add to Cart */}
-          <div className="pt-4">
+          <div className="pt-4 flex flex-col gap-4">
             <AddToCartPanel productId={product.id} max={product.stock} />
+            <div>
+              <ProductWishlistButton productId={product.id} productName={product.name} />
+            </div>
           </div>
 
           {/* Shipping Info */}

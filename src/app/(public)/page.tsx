@@ -24,17 +24,22 @@ export default async function StorefrontPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="bg-primary px-4 py-20 text-white md:px-12 md:py-32 w-full">
-        <div className="max-w-7xl mx-auto flex flex-col items-start pr-4">
-          <p className="mb-2 text-sm text-white/90">Gear Up for Your Next</p>
-          <h1 className="text-5xl font-extrabold md:text-[64px] leading-tight max-w-3xl">
+      <section 
+        className="relative px-4 py-20 text-white md:px-12 md:py-32 w-full rounded-2xl overflow-hidden bg-cover bg-center shadow-sm"
+        style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2074&q=80")' }}
+      >
+        <div className="absolute inset-0 bg-primary/80"></div>
+        
+        <div className="max-w-7xl mx-auto flex flex-col items-start pr-4 relative z-10">
+          <p className="mb-2 text-sm text-white/90 font-medium drop-shadow-sm">Gear Up for Your Next</p>
+          <h1 className="text-5xl font-extrabold md:text-[64px] leading-tight max-w-3xl drop-shadow-md">
             Gear Up for Your Next<br />Adventure
           </h1>
-          <div className="mt-10 flex flex-wrap gap-4">
+          <div className="mt-10 flex flex-wrap gap-4 drop-shadow-sm">
             <Button asChild className="bg-white text-brown hover:bg-white/90 rounded-full px-8 h-12 font-bold shadow-none text-sm">
               <Link href="/products">SHOP NOW →</Link>
             </Button>
-            <Button asChild variant="outline" className="border-2 border-white bg-transparent text-white hover:bg-white/10 rounded-full px-8 h-12 font-bold shadow-none text-sm">
+            <Button asChild variant="outline" className="border-2 border-white bg-transparent text-white hover:bg-white/20 backdrop-blur-sm rounded-full px-8 h-12 font-bold shadow-none text-sm">
               <Link href="/products">View Categories</Link>
             </Button>
           </div>
@@ -51,16 +56,19 @@ export default async function StorefrontPage() {
                 name: 'Camping',
                 description: 'Tents, sleeping bags, and essential camping gear',
                 href: '/products?category=camping',
+                image: 'https://images.unsplash.com/photo-1504280390227-bb25b84e3065?auto=format&fit=crop&w=400&q=80',
               },
               {
                 name: 'Hiking',
                 description: 'Backpacks, trekking poles, and trail essentials',
                 href: '/products?category=hiking',
+                image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=400&q=80',
               },
               {
                 name: 'Clothing',
                 description: 'Jackets, boots, and outdoor apparel',
                 href: '/products?category=clothing',
+                image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=400&q=80',
               },
             ].map((category) => (
               <Link
@@ -69,7 +77,10 @@ export default async function StorefrontPage() {
                 className="group flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-white shadow-sm hover:shadow-md transition-all text-center"
               >
                 <div className="p-10 flex flex-col items-center">
-                  <div className="mb-6 h-28 w-28 rounded-full bg-[#f3f1ea] group-hover:scale-105 transition-transform" />
+                  <div 
+                    className="mb-6 h-28 w-28 rounded-full bg-[#f3f1ea] group-hover:scale-105 transition-transform bg-cover bg-center shadow-inner" 
+                    style={{ backgroundImage: `url("${category.image}")` }}
+                  />
                   <h3 className="text-xl font-bold text-brown">{category.name}</h3>
                   <p className="mt-2 text-sm text-muted px-4 leading-relaxed">{category.description}</p>
                 </div>

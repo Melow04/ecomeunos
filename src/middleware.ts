@@ -6,11 +6,11 @@ export default auth((req) => {
   const pathname = req.nextUrl.pathname
   const session = req.auth
 
-  if (pathname.startsWith('/account')) {
+  if (pathname.startsWith('/account') || pathname.startsWith('/checkout')) {
     if (!session) {
       const url = req.nextUrl.clone()
       url.pathname = '/auth/login'
-      url.searchParams.set('next', pathname)
+      url.searchParams.set('next', pathname + req.nextUrl.search)
       return NextResponse.redirect(url)
     }
   }
@@ -34,5 +34,5 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: ['/account/:path*', '/admin/:path*'],
+  matcher: ['/account/:path*', '/admin/:path*', '/checkout/:path*'],
 }

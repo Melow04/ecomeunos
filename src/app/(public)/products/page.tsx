@@ -2,7 +2,7 @@ import { getDb } from '@/db'
 import { products } from '@/db/schema'
 import { FilterSidebar } from '@/components/product/FilterSidebar'
 import { ProductCard, type ProductForCard } from '@/components/product/ProductCard'
-import { and, asc, desc, gte, inArray, lte, sql, ilike } from 'drizzle-orm'
+import { and, or, asc, desc, gte, inArray, lte, sql, ilike } from 'drizzle-orm'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -49,6 +49,7 @@ export default async function ProductsPage({
   const sort = typeof sp.sort === 'string' ? sp.sort : 'newest'
   const page = Math.max(1, parseInt(typeof sp.page === 'string' ? sp.page : '1', 10) || 1)
   const q = typeof sp.q === 'string' ? sp.q.trim() : ''
+  const qWords = q.split(/\s+/).filter(Boolean)
   const pageSize = 12
   const offset = (page - 1) * pageSize
 
@@ -56,7 +57,13 @@ export default async function ProductsPage({
     categories.length > 0 ? inArray(products.category, categories) : undefined,
     minPrice !== null ? gte(products.price, String(minPrice.toFixed(2))) : undefined,
     maxPrice !== null ? lte(products.price, String(maxPrice.toFixed(2))) : undefined,
-    q ? ilike(products.name, `%${q}%`) : undefined
+    qWords.length > 0 ? and(...qWords.map(word => 
+      or(
+        ilike(products.name, `%${word}%`),
+        ilike(products.description, `%${word}%`),
+        ilike(products.category, `%${word}%`)
+      )
+    )) : undefined
   )
 
   const orderBy =

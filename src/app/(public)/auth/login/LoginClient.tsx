@@ -100,7 +100,7 @@ export default function LoginClient() {
           </form>
           <div className="text-sm text-muted">
             New here?{' '}
-            <Link className="text-primary hover:underline" href="/auth/register">
+            <Link className="text-primary hover:underline" href={`/auth/register?next=${encodeURIComponent(next)}`}>
               Create Account
             </Link>
           </div>

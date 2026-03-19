@@ -1,16 +1,22 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { useCart } from '@/hooks/useCart'
+import { Suspense } from 'react'
 
-export default function RegisterPage() {
+function RegisterClient() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const next = searchParams.get('next') || '/account'
+
+  const { guestItems, clearGuest } = useCart()
 
   const [form, setForm] = React.useState({
     firstName: '',
@@ -60,7 +66,18 @@ export default function RegisterPage() {
         redirect: false,
       })
 
-      router.push('/account')
+      if (guestItems.length > 0) {
+        for (const item of guestItems) {
+          await fetch('/api/cart', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ productId: item.productId, quantity: item.quantity }),
+          })
+        }
+        clearGuest()
+      }
+
+      router.push(next)
     } finally {
       setBusy(false)
     }
@@ -92,13 +109,21 @@ export default function RegisterPage() {
           </form>
           <div className="text-sm text-muted">
             Already have an account?{' '}
-            <Link className="text-primary hover:underline" href="/auth/login">
+            <Link className="text-primary hover:underline" href={`/auth/login?next=${encodeURIComponent(next)}`}>
               Sign in
             </Link>
           </div>
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-sm text-muted">Loading…</div>}>
+      <RegisterClient />
+    </Suspense>
   )
 }
 

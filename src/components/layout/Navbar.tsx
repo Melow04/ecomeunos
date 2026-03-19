@@ -28,7 +28,7 @@ function SearchInput() {
 
   React.useEffect(() => {
     const q = searchParams?.get('q')
-    if (q) setSearchQuery(q)
+    setSearchQuery(q || '')
   }, [searchParams])
 
   const handleSearch = (e: React.FormEvent) => {

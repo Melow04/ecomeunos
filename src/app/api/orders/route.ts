@@ -11,7 +11,7 @@ import {
   shippingAddresses,
 } from '@/db/schema'
 import { auth } from '@/lib/auth'
-import { eq, inArray } from 'drizzle-orm'
+import { eq, inArray, and } from 'drizzle-orm'
 
 const shippingSchema = z.object({
   firstName: z.string().min(1).max(100),
@@ -95,13 +95,28 @@ export async function POST(req: Request) {
     const cartId = cartRow[0]?.id
     if (!cartId) return []
 
-    const cartRows = await db
-      .select({
-        productId: cartItems.productId,
-        quantity: cartItems.quantity,
-      })
-      .from(cartItems)
-      .where(eq(cartItems.cartId, cartId))
+    const query = itemsInput && itemsInput.length > 0
+      ? db
+          .select({
+            productId: cartItems.productId,
+            quantity: cartItems.quantity,
+          })
+          .from(cartItems)
+          .where(
+            and(
+              eq(cartItems.cartId, cartId),
+              inArray(cartItems.productId, itemsInput.map(i => i.productId))
+            )
+          )
+      : db
+          .select({
+            productId: cartItems.productId,
+            quantity: cartItems.quantity,
+          })
+          .from(cartItems)
+          .where(eq(cartItems.cartId, cartId))
+
+    const cartRows = await query
 
     return cartRows
   })()
@@ -197,7 +212,18 @@ export async function POST(req: Request) {
         .limit(1)
       const cartId = cartRow[0]?.id
       if (cartId) {
-        await tx.delete(cartItems).where(eq(cartItems.cartId, cartId))
+        if (itemsInput && itemsInput.length > 0) {
+          await tx
+            .delete(cartItems)
+            .where(
+              and(
+                eq(cartItems.cartId, cartId),
+                inArray(cartItems.productId, itemsInput.map((i) => i.productId))
+              )
+            )
+        } else {
+          await tx.delete(cartItems).where(eq(cartItems.cartId, cartId))
+        }
         await tx.update(cart).set({ updatedAt: new Date() }).where(eq(cart.id, cartId))
       }
     }

@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useCart } from '@/hooks/useCart'
+import { useWishlist } from '@/hooks/useWishlist'
 
 export type ProductForCard = {
   id: string
@@ -29,7 +30,10 @@ export type ProductForCard = {
 export function ProductCard({ product }: { product: ProductForCard }) {
   const { data: session } = useSession()
   const { hydrate, hydrated, addGuestItem } = useCart()
+  const { items: wishlistItems, toggleWishlist } = useWishlist()
   const [busy, setBusy] = React.useState(false)
+
+  const isWishlisted = wishlistItems.includes(product.id)
 
   React.useEffect(() => {
     if (!hydrated) hydrate()
@@ -91,8 +95,23 @@ export function ProductCard({ product }: { product: ProductForCard }) {
             </span>
           )}
         </div>
-        <button className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-muted hover:text-brown transition-colors">
-          <Heart className="h-4 w-4" />
+        <button 
+          onClick={(e) => {
+            e.preventDefault()
+            if (!session?.user?.id) {
+              toast.error('Please log in to use the wishlist')
+              return
+            }
+            toggleWishlist(product.id)
+            if (isWishlisted) {
+              toast.success(`${product.name} removed from wishlist`)
+            } else {
+              toast.success(`${product.name} added to wishlist`)
+            }
+          }}
+          className={`absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors ${isWishlisted ? 'text-red-500 hover:text-red-700' : 'text-muted hover:text-brown'}`}
+        >
+          <Heart className="h-4 w-4" fill={isWishlisted ? 'currentColor' : 'none'} />
         </button>
         <div className="absolute inset-x-3 bottom-3 opacity-0 transition-opacity group-hover:opacity-100">
           <Button
