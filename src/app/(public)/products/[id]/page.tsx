@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { getDb } from '@/db'
-import { products } from '@/db/schema'
+import { products, reviews } from '@/db/schema'
 import { AddToCartPanel } from '@/components/product/AddToCartPanel'
 import { ProductWishlistButton } from '@/components/product/ProductWishlistButton'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/card'
 import { ProductCard } from '@/components/product/ProductCard'
 import { eq, desc } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
+import { Reviews } from './Reviews'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,6 +34,18 @@ export default async function ProductDetailsPage({
     .where(eq(products.category, product.category))
     .orderBy(desc(products.createdAt))
     .limit(4)
+
+  // Get reviews
+  let initialReviews: (typeof reviews.$inferSelect)[] = []
+  try {
+    initialReviews = await db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.productId, id))
+      .orderBy(desc(reviews.createdAt))
+  } catch (_error) {
+    // If DB hasn't been migrated yet, catch the error
+  }
 
   return (
     <div className="space-y-12">
@@ -200,6 +213,9 @@ export default async function ProductDetailsPage({
           </div>
         </div>
       </div>
+
+      {/* Reviews */}
+      <Reviews productId={id} initialReviews={initialReviews} />
 
       {/* You May Also Like */}
       <section>

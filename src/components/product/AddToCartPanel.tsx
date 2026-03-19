@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useCart } from '@/hooks/useCart'
+import { useGlobalCart } from '@/hooks/useGlobalCart'
 
 export function AddToCartPanel({
   productId,
@@ -17,6 +18,8 @@ export function AddToCartPanel({
 }) {
   const { data: session } = useSession()
   const { hydrate, hydrated, addGuestItem } = useCart()
+  const setUserCount = useGlobalCart(s => s.setUserCount)
+  const userCount = useGlobalCart(s => s.userCount)
   const [qty, setQty] = React.useState(1)
   const [busy, setBusy] = React.useState(false)
 
@@ -36,6 +39,7 @@ export function AddToCartPanel({
           body: JSON.stringify({ productId, quantity }),
         })
         if (!res.ok) throw new Error('add_failed')
+        setUserCount(userCount + quantity)
       } else {
         addGuestItem(productId, quantity)
       }

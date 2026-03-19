@@ -130,8 +130,8 @@ export default function AdminProductsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-brown">Product Management</h1>
-          <p className="mt-1 text-sm text-muted">Create, edit, and manage inventory</p>
+          <h1 className="text-2xl font-bold text-black">Product Management</h1>
+          <p className="mt-1 text-sm text-black/60">Create, edit, and manage inventory</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <Button className="gap-2" onClick={handleAdd}>
@@ -144,7 +144,7 @@ export default function AdminProductsPage() {
             </DialogHeader>
             <div className="grid gap-4">
               <div>
-                <label className="text-sm font-medium text-brown">Product Name</label>
+                <label className="text-sm font-medium text-black">Product Name</label>
                 <Input
                   placeholder="Enter product name"
                   value={draft.name}
@@ -153,7 +153,7 @@ export default function AdminProductsPage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-brown">Description</label>
+                <label className="text-sm font-medium text-black">Description</label>
                 <Input
                   placeholder="Enter description"
                   value={draft.description}
@@ -163,7 +163,7 @@ export default function AdminProductsPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium text-brown">Price</label>
+                  <label className="text-sm font-medium text-black">Price</label>
                   <Input
                     placeholder="0.00"
                     value={draft.price}
@@ -172,7 +172,7 @@ export default function AdminProductsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-brown">Stock</label>
+                  <label className="text-sm font-medium text-black">Stock</label>
                   <Input
                     placeholder="0"
                     value={draft.stock}
@@ -182,9 +182,9 @@ export default function AdminProductsPage() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-brown">Category</label>
+                <label className="text-sm font-medium text-black">Category</label>
                 <select
-                  className="mt-1 h-10 w-full rounded-md border border-brown/15 bg-white px-3 text-sm"
+                  className="mt-1 h-10 w-full rounded-md border border-black/15 bg-white px-3 text-sm"
                   value={draft.category}
                   onChange={(e) => setDraft({ ...draft, category: e.target.value as Product['category'] })}
                 >
@@ -195,8 +195,8 @@ export default function AdminProductsPage() {
                 </select>
               </div>
               
-              <div className="grid grid-cols-3 gap-4 border-t border-b border-brown/10 py-4">
-                <label className="flex items-center gap-2 text-sm font-medium text-brown cursor-pointer">
+              <div className="grid grid-cols-3 gap-4 border-t border-b border-black/10 py-4">
+                <label className="flex items-center gap-2 text-sm font-medium text-black cursor-pointer">
                   <input 
                     type="checkbox" 
                     className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
@@ -205,7 +205,7 @@ export default function AdminProductsPage() {
                   />
                   Featured
                 </label>
-                <label className="flex items-center gap-2 text-sm font-medium text-brown cursor-pointer">
+                <label className="flex items-center gap-2 text-sm font-medium text-black cursor-pointer">
                   <input 
                     type="checkbox" 
                     className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
@@ -214,7 +214,7 @@ export default function AdminProductsPage() {
                   />
                   New Arrival
                 </label>
-                <label className="flex items-center gap-2 text-sm font-medium text-brown cursor-pointer">
+                <label className="flex items-center gap-2 text-sm font-medium text-black cursor-pointer">
                   <input 
                     type="checkbox" 
                     className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
@@ -226,7 +226,7 @@ export default function AdminProductsPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-brown mb-1 block">Product Image</label>
+                <label className="text-sm font-medium text-black mb-1 block">Product Image</label>
                 <div className="flex items-center gap-4">
                   {draft.image && (
                     <img src={draft.image} alt="Preview" className="w-16 h-16 object-cover rounded-md border" />
@@ -281,7 +281,7 @@ export default function AdminProductsPage() {
       <Card className="p-6">
         <div className="mb-6 flex items-center gap-2">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted" />
+            <Search className="absolute left-3 top-2.5 h-5 w-5 text-black/60" />
             <Input
               placeholder="Search for products..."
               value={q}
@@ -296,29 +296,29 @@ export default function AdminProductsPage() {
         </div>
 
         {loading ? (
-          <div className="text-sm text-muted py-8">Loading…</div>
+          <div className="text-sm text-black/60 py-8">Loading…</div>
         ) : items.length === 0 ? (
-          <div className="text-sm text-muted py-8 text-center">No products found</div>
+          <div className="text-sm text-black/60 py-8 text-center">No products found</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-brown/10">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Product</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Category</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Price</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Stock</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Actions</th>
+                <tr className="border-b border-black/10">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-black/60 uppercase">Product</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-black/60 uppercase">Category</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-black/60 uppercase">Price</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-black/60 uppercase">Stock</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-black/60 uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-black/60 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((p) => (
-                  <tr key={p.id} className="border-b border-brown/10 hover:bg-brown/2">
-                    <td className="px-4 py-4 font-semibold text-brown">{p.name}</td>
-                    <td className="px-4 py-4 text-sm text-muted capitalize">{p.category}</td>
-                    <td className="px-4 py-4 font-semibold text-brown">${p.price}</td>
-                    <td className="px-4 py-4 text-sm text-brown font-medium">{p.stock}</td>
+                  <tr key={p.id} className="border-b border-black/10 hover:bg-black/5">
+                    <td className="px-4 py-4 font-semibold text-black">{p.name}</td>
+                    <td className="px-4 py-4 text-sm text-black/60 capitalize">{p.category}</td>
+                    <td className="px-4 py-4 font-semibold text-black">${p.price}</td>
+                    <td className="px-4 py-4 text-sm text-black font-medium">{p.stock}</td>
                     <td className="px-4 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadgeColor(p.status)}`}>
                         {p.status === 'active' ? 'active' : p.status === 'low-stock' ? 'Low Stock' : 'Out of Stock'}

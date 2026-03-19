@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useCart } from '@/hooks/useCart'
+import { useGlobalCart } from '@/hooks/useGlobalCart'
 import { Trash2 } from 'lucide-react'
 
 type Product = {
@@ -50,6 +51,7 @@ export default function CartPage() {
   const { hydrated, hydrate, guestItems, setGuestQuantity, removeGuestItem } = useCart()
 
   const [userItems, setUserItems] = React.useState<UserCartItem[]>([])
+  const setUserCount = useGlobalCart(s => s.setUserCount)
   const [guestProducts, setGuestProducts] = React.useState<Record<string, Product>>({})
   const [loading, setLoading] = React.useState(false)
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set())
@@ -64,7 +66,10 @@ export default function CartPage() {
     setLoading(true)
     fetch('/api/cart')
       .then((r) => r.json())
-      .then((data) => setUserItems(data.items ?? []))
+      .then((data) => {
+        setUserItems(data.items ?? [])
+        setUserCount((data.items ?? []).reduce((acc: number, i: any) => acc + (i.quantity || 0), 0))
+      })
       .finally(() => setLoading(false))
   }, [status])
 
@@ -105,11 +110,19 @@ export default function CartPage() {
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ quantity: q }),
           })
-          setUserItems((prev) => prev.map((x) => (x.id === i.id ? { ...x, quantity: q } : x)))
+          setUserItems((prev) => {
+            const next = prev.map((x) => (x.id === i.id ? { ...x, quantity: q } : x))
+            setUserCount(next.reduce((acc, item) => acc + (item.quantity || 0), 0))
+            return next
+          })
         },
         onRemove: async () => {
           await fetch(`/api/cart/${i.id}`, { method: 'DELETE' })
-          setUserItems((prev) => prev.filter((x) => x.id !== i.id))
+          setUserItems((prev) => {
+            const next = prev.filter((x) => x.id !== i.id)
+            setUserCount(next.reduce((acc, item) => acc + (item.quantity || 0), 0))
+            return next
+          })
         },
       }))
     : guestItems

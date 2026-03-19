@@ -1,4 +1,15 @@
+# EUNOS EcoGear
+
 EUNOS EcoGear is a full-stack e-commerce prototype for camping and hiking equipment.
+
+## Group Project Members
+
+This project was developed by:
+- **Karmelo Andrei L. Cortes** (Designer, Lead Developer)
+- **Adrian I. Aldave** (Documentor, Designer)
+- **John Erick D. Mangubat** (Designer, Dev)
+- **Daniel F. Villa** (Documentor, Dev)
+- **Jefferson Paul M. Petronio** (Documentor, Designer)
 
 ## Tech Stack
 

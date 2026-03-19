@@ -153,3 +153,13 @@ export const wishlists = pgTable(
     ),
   })
 )
+
+export const reviews = pgTable('reviews', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  productId: uuid('product_id').notNull().references(() => products.id, { onDelete: 'cascade' }),
+  author: varchar('author', { length: 200 }).notNull(),
+  rating: integer('rating').notNull(),
+  comment: text('comment').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+

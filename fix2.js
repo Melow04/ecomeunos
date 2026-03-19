@@ -1,0 +1,1 @@
+const fs = require('fs'); let p = fs.readFileSync('src/app/admin/page.tsx', 'utf8'); p = p.replace(/sql<number=/g, 'sql<number>'); fs.writeFileSync('src/app/admin/page.tsx', p); let o = fs.readFileSync('src/app/admin/orders/page.tsx', 'utf8'); o = o.replace(/Row\['order'\]\[status'\]/g, "Row['order']['status']"); fs.writeFileSync('src/app/admin/orders/page.tsx', o);

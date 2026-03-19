@@ -8,18 +8,8 @@ import { Heart, ShoppingCart, User, Search, Mountain } from 'lucide-react'
 import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
-
-function getGuestCount() {
-  if (typeof window === 'undefined') return 0
-  const raw = window.localStorage.getItem('eunos_guest_cart')
-  if (!raw) return 0
-  try {
-    const parsed = JSON.parse(raw) as Array<{ quantity: number }>
-    return parsed.reduce((sum, i) => sum + (i.quantity || 0), 0)
-  } catch {
-    return 0
-  }
-}
+import { useCart } from '@/hooks/useCart'
+import { useGlobalCart } from '@/hooks/useGlobalCart'
 
 function SearchInput() {
   const router = useRouter()
@@ -58,14 +48,28 @@ function SearchInput() {
 
 export function Navbar() {
   const { data: session } = useSession()
-  const [guestCount, setGuestCount] = React.useState(0)
+  const guestItems = useCart(s => s.guestItems || [])
+  const hydrated = useCart(s => s.hydrated)
+  const userCount = useGlobalCart(s => s.userCount)
+  const setUserCount = useGlobalCart(s => s.setUserCount)
 
   React.useEffect(() => {
-    setGuestCount(getGuestCount())
-    const onStorage = () => setGuestCount(getGuestCount())
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
+    useCart.getState().hydrate?.()
   }, [])
+
+  React.useEffect(() => {
+    if (session?.user) {
+      fetch('/api/cart')
+        .then(r => r.json())
+        .then(d => {
+          if (d?.items) {
+            setUserCount(d.items.reduce((acc: number, i: any) => acc + (i.quantity || 0), 0))
+          }
+        }).catch(err => console.error('Cart fetch failed', err))
+    }
+  }, [session, setUserCount])
+
+  const cartCount = session?.user ? userCount : (hydrated ? guestItems.reduce((acc: number, i: any) => acc + (i.quantity || 0), 0) : 0)
 
   return (
     <header className="sticky top-0 z-40 border-b border-black/5 bg-white shadow-sm">
@@ -114,7 +118,7 @@ export function Navbar() {
             <Link href="/cart" className="relative group">
               <ShoppingCart className="h-[22px] w-[22px] text-brown group-hover:text-primary transition-colors" strokeWidth={2.5} />
               <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white shadow-sm">
-                {session ? '•' : guestCount}
+                {cartCount > 0 ? cartCount : 0}
               </span>
             </Link>
           </Button>

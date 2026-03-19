@@ -9,7 +9,9 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:gap-8">
           <div>
             <div className="flex items-center gap-2 font-black text-xl tracking-tight text-white mb-4">
-              <Image src="/logo.svg" alt="EcoGear Logo" width={40} height={40} className="w-auto h-10 brightness-0 invert" />
+              <div className="bg-white rounded-full p-1 flex items-center justify-center">
+                <Image src="/logo.svg" alt="EcoGear Logo" width={32} height={32} className="w-auto h-8" />
+              </div>
               EcoGear
             </div>
             <p className="mt-3 text-sm text-white/90 leading-relaxed pr-8">
