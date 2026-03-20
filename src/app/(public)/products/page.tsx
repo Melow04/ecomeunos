@@ -58,12 +58,12 @@ export default async function ProductsPage({
     minPrice !== null ? gte(products.price, String(minPrice.toFixed(2))) : undefined,
     maxPrice !== null ? lte(products.price, String(maxPrice.toFixed(2))) : undefined,
     qWords.length > 0 ? and(...qWords.map(word => 
-      or(
-        ilike(products.name, `%${word}%`),
-        ilike(products.description, `%${word}%`),
-        ilike(products.category, `%${word}%`)
-      )
-    )) : undefined
+  or(
+    ilike(products.name, `%${word}%`),
+    ilike(products.description, `%${word}%`),
+    ilike(sql`${products.category}::text`, `%${word}%`) // ✅ Cast enum to text
+  )
+)) : undefined
   )
 
   const orderBy =
